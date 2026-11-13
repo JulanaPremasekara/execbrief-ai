@@ -1,0 +1,1 @@
+export default function StreamingStatus({message}){return <div className="text-xs text-teal-700" role="status">{message.status}{message.error&&<p role="alert" className="mt-2 text-red-700">{message.error}</p>}</div>}

@@ -1,0 +1,3 @@
+import BlockRenderer from '../../visualizations/components/BlockRenderer';
+import SourceReferences from './SourceReferences';import StreamingStatus from './StreamingStatus';
+export default function ChatMessage({message}){return <article className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm"><p className="mb-4 text-xs font-bold uppercase tracking-widest text-slate-500">{message.role==='user'?'You':'ExecBrief · fictional demo'}</p>{message.role==='user'?<p>{message.content}</p>:<><div className="space-y-6">{message.blocks.map(b=><BlockRenderer key={b.id} block={b}/>)}</div><SourceReferences sources={message.sources}/><StreamingStatus message={message}/></>}</article>}

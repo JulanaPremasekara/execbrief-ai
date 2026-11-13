@@ -1,0 +1,1 @@
+export default function SourceReferences({sources=[]}){return sources.length>0&&<footer className="mt-5 border-t border-slate-100 pt-3 text-xs text-slate-500">Sources: {sources.map(s=>s.filename).join(' · ')}</footer>}
