@@ -92,7 +92,7 @@ Prerequisite: verified Phase 2 and instruction to proceed. Hosted HF token/model
 
 ## Phase 4 - Architecture and testing
 
-Prerequisite: verified Phase 3 and instruction to proceed. This phase expands assurance and documentation rather than postponing architectural correctness until the end.
+The user authorized Phase 4 despite pending Phase 3 live checks. Phase 4 integration and automated verification proceed; final live acceptance remains blocked until Supabase/HF configuration works. This phase expands assurance and documentation rather than postponing architectural correctness until the end.
 
 ### Work
 

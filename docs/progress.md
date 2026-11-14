@@ -4,7 +4,34 @@ Last updated: 2026-11-14 (Asia/Colombo).
 
 ## Current status
 
-Phase 3 backend implementation is present and mocked verification passes. Live acceptance is blocked by database DNS resolution and a failed hosted-model capability check. Phase 3 is not fully verified. Phase 4 has not started.
+Phase 4 integration is implemented and automated verification passes. Final live acceptance is NOT complete: the configured Supabase hostname does not resolve and the hosted-model capability check fails. Earlier phase notes below are historical records, not current authorization or completion claims.
+
+## Phase 4 delivery and verification
+
+- Authorized by the user's explicit Phase 4 instruction. Preserved mock mode and the seven-event SSE contract; live dependency composition connects the existing LangChain retriever, Supabase repository, Pandas analytics and hosted HF provider to the endpoint.
+- Added resource lifecycle ownership in core/live_chat.py. Cancellation closes generation and disposes the engine; cancellation during blocking initialization disposes the resource when initialization finishes. Failed vector/embedding initialization also disposes its engine.
+- Loaded backend configuration before CORS settings; health reports configured execution mode. The frontend distinguishes mock/live configuration and visibly labels validated-block output without claiming service readiness.
+- Preserved ordered blocks, earlier conversation content and sources after errors. Failed/partial assistant output is excluded from future history; history entries are bounded. Unmount aborts requests and suppresses subsequent state updates.
+- Added endpoint integration coverage for the exact question **"How is our company performing over the last six months?"**. Real orchestration/Pandas/SSE with fake repository/retriever/model produces Text -> Line -> Text -> Bar -> Recommendations, sourced rows and October revenue 14,000,000. This proves wiring and calculations, not hosted model interpretation or live retrieval.
+- Added cancellation/resource cleanup tests and frontend integration through real fetch/SSE parsing with fragmented frames; verifies progressive state updates and source retention. Existing tests cover actual Recharts DOM, errors, cancellation and incomplete streams.
+- `python -m pytest apps/backend/tests -q -p no:cacheprovider`: **37 passed, 2 skipped**, one upstream langchain-community deprecation warning. The skipped tests require live Supabase. Initial restricted run hit Windows temporary-directory permission errors; the authorized unrestricted run passed.
+- `npm.cmd test`: **10 passed** across three files. Initial restricted launch failed with spawn EPERM. The new HTTP fixture initially lacked response headers; corrected it and reran successfully.
+- `npm.cmd run build`: **passed**, approximately 648 kB main bundle / 193 kB gzip; Vite warns above 500 kB. No bundle optimization claim.
+- `scripts/check_database.py`: **failed**, configured hostname cannot resolve, including outside sandbox.
+- `scripts/check_hf.py`: **failed**, sanitized hosted capability diagnostic. Availability/access/token or model configuration requires local correction; the exact provider cause is not established.
+- `scripts/check_workflow.py`: **failed**, exact requested question submitted through FastAPI in-process using live configuration; endpoint emitted sanitized failure. No live briefing, ingestion, retrieval or chart success is claimed.
+- Updated README, architecture, API/RAG documentation and phase plan with actual setup, fallback behavior and limitations. The existing `docs/` Git ignore rule excludes untracked documentation (including API/RAG workflow guides); tracked architecture, plan and progress changes appear normally. Untracked guides require explicit inclusion if committing them.
+
+### Decisions and remaining acceptance
+
+- Use the specification's validated-block fallback. Full structured output must pass grounding/chart validation before publication. No artificial delays or raw model-token replay. True hosted token streaming is not implemented or verified; no compatible provider capability has been established. React may paint several immediately arriving blocks together.
+- Live mode contains no fixed demonstration chart rows. The default remains explicitly labeled mock for offline testing. Health reports configuration only, not external readiness.
+- Blocking embedding/database work cannot be forcibly cancelled once executing in a worker. Per-request adapter initialization can be expensive. Production auth/rate limits, deployment/container verification and a real-browser network walkthrough remain unverified/out of this delivery.
+- Existing limitations remain: extractive factual prose, qualitative recommendations not mechanically proven, mixed monetary/percentage revenue columns requiring compatible chart series, source replacement convergence rather than atomic batch replacement, and mutable metadata-based initial Alembic migration.
+- Configure rotated secrets locally in `.env.local`; obtain the current Supabase Session pooler URI from Dashboard > Connect (5432), and an available hosted HF model/token. Do not paste secrets into chat. Then run connection check, seed/migrations, ingestion, live integration tests, hosted capability check and workflow smoke check, followed by the browser question/cancellation walkthrough.
+- Stop after Phase 4. Final product acceptance remains pending these live checks; no further phase is started.
+
+## Historical phase records
 
 ## Phase 3 delivery and verification
 
@@ -115,4 +142,4 @@ Detailed gates and criteria are in [implementation-plan.md](implementation-plan.
 
 ## Next authorized action
 
-Correct local database/model configuration and resume Phase 3 live verification. Stop before Phase 4.
+Correct local database/model configuration and rerun the pending live acceptance checks documented above. Phase 4 code work is delivered; final acceptance is pending, not claimed complete.

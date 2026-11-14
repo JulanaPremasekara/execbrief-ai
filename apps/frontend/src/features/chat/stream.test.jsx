@@ -12,6 +12,18 @@ vi.mock('recharts',async()=>{
 });
 afterEach(cleanup);
 const payload=(sequence,more={})=>({sequence,message_id:'m',request_id:'r',...more});
+it('retains completed sources when a later block fails',()=>{
+ let s=applyEvent(initialStream(),'status',payload(1,{stream_mode:'validated_blocks',message:'Checking'}));
+ s=applyEvent(s,'block_start',payload(2,{block_id:'a',block_type:'text',position:0}));
+ s=applyEvent(s,'text_delta',payload(3,{block_id:'a',delta:'Verified'}));
+ s=applyEvent(s,'block_end',payload(4,{block_id:'a',sources:[{id:'source',filename:'Report.pdf'}]}));
+ s=applyEvent(s,'error',payload(5,{message:'Unavailable'}));
+ s=applyEvent(s,'done',payload(6,{outcome:'error',sources:[]}));
+ expect(s.sources).toHaveLength(1);
+ expect(s.blocks[0].content).toBe('Verified');
+ render(<StreamingStatus message={s}/>);
+ expect(screen.getByText(/Validated blocks/)).toBeTruthy();
+});
 describe('stream transport and state',()=>{
  it('decodes byte-fragmented UTF-8, CRLF and multiple frames',async()=>{
   const bytes=new TextEncoder().encode('event: status\r\ndata: {"message":"café"}\r\n\r\nevent: done\ndata: {}\n\n');

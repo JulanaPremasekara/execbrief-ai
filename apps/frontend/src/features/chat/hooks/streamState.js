@@ -4,6 +4,7 @@ export function applyEvent(state,event,p){
   if(state.messageId && (state.messageId!==p.message_id || state.requestId!==p.request_id))throw Error('Stream identity changed');
   const s={...state,blocks:state.blocks.map(b=>({...b})),sequence:p.sequence,messageId:p.message_id,requestId:p.request_id};
   const active=s.blocks.find(b=>!b.complete);
+  if(p.stream_mode)s.streamMode=p.stream_mode;
   if(event==='status')s.status=p.message;
   else if(event==='block_start'){
     if(active || p.position!==s.blocks.length || s.blocks.some(b=>b.id===p.block_id) || !['text','chart'].includes(p.block_type))throw Error('Invalid block order');
@@ -15,11 +16,11 @@ export function applyEvent(state,event,p){
       if(active.type!=='chart'||active.spec||!['bar','line'].includes(p.spec?.chart_type)||p.spec.dataset_id!==p.dataset?.id||![p.spec.x,...p.spec.y].every(c=>p.dataset.columns.includes(c)))throw Error('Invalid chart');
       active.spec=p.spec;active.dataset=p.dataset;
     }
-    if(event==='block_end'){if(active.type==='chart'&&!active.spec)throw Error('Missing chart');active.complete=true;}
+    if(event==='block_end'){if(active.type==='chart'&&!active.spec)throw Error('Missing chart');active.complete=true;s.sources=[...new Map([...s.sources,...(p.sources||[])].map(source=>[source.id,source])).values()];}
   } else if(event==='error'){s.error=p.message;s.status='Failed';}
   else if(event==='done'){
     if(!['completed','error'].includes(p.outcome)||(p.outcome==='completed'&&active))throw Error('Incomplete response');
-    s.done=true;s.sources=p.sources;s.status=p.outcome==='completed'?'Complete':'Failed';
+    s.done=true;s.sources=[...new Map([...s.sources,...(p.sources||[])].map(source=>[source.id,source])).values()];s.status=p.outcome==='completed'?'Complete':'Failed';
   }else throw Error('Unknown stream event');
   return s;
 }

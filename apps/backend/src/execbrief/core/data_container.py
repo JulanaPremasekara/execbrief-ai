@@ -7,7 +7,11 @@ from execbrief.infrastructure.rag.text_splitter import TextSplitter
 from execbrief.application.use_cases.ingest_documents import IngestDocumentsUseCase
 def build_ingestion():
     engine=create_database_engine()
-    ensure_vector(engine)
-    store=VectorStore(engine,build_embeddings())
-    return engine,store,IngestDocumentsUseCase({".pdf":PDFLoader(),".csv":CSVLoader()},TextSplitter(),store)
+    try:
+        ensure_vector(engine)
+        store=VectorStore(engine,build_embeddings())
+        return engine,store,IngestDocumentsUseCase({".pdf":PDFLoader(),".csv":CSVLoader()},TextSplitter(),store)
+    except BaseException:
+        engine.dispose()
+        raise
 

@@ -1,6 +1,14 @@
 # Proposed architecture
 
-Status: Phase 1 mock slice and Phase 2 data/ingestion adapters implemented. Phase 2 live database verification is pending connection configuration. Later AI/analytics components remain design targets. See rag-pipeline.md and progress.md for implemented behavior and evidence.
+Status: all four phases have implementation present; live acceptance is pending Supabase/HF configuration. The target tree below is a design map, not a claim that every named module exists. See progress.md for verified results.
+
+## Implemented live request lifecycle
+
+`api/dependencies.py` selects `core/container.py` composition using EXECBRIEF_MODE. Mock mode preserves the demonstration. Live mode constructs the hosted provider, Supabase repository, Pandas analytics and LangChain retriever; `LiveChat` owns cleanup. `AskGroundedUseCase` plans approved operations, computes datasets, retrieves evidence, validates the response and emits ordered domain events. The route serializes them as SSE. React's fetch parser feeds the hook/reducer, which appends stable blocks and retains prior content and sources on errors/cancellation. Chart components receive only backend-resolved rows.
+
+Live output uses validated-block fallback, not token streaming: complete structured generation is checked before any response block is published, without artificial delays. Status events are emitted while planning/retrieving/generating. Hosted streaming capability is unverified. The health endpoint reports selected mode, not external-service readiness.
+
+Connection initialization runs in a worker thread. Cancellation during initialization schedules disposal when that worker finishes; cancellation during generation closes the async iterator and engine. Already-running synchronous database/embedding operations cannot be forcibly interrupted. Each live request currently creates adapters; caching/pooling across requests is a future performance improvement.
 
 ## Layers and dependency direction
 

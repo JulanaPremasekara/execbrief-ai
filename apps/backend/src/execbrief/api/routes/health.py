@@ -3,5 +3,6 @@ router = APIRouter()
 
 @router.get("/api/health")
 def health():
-    return {"status": "ok", "mode": "mock"}
+    from execbrief.core.runtime import execution_mode
+    return {"status": "ok", "mode": execution_mode()}
 

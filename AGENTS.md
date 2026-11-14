@@ -3,7 +3,7 @@
 ## Authority and workflow
 
 - Read the complete [master specification](docs/MASTER_SPEC.md) before changing the project. It defines the product and mandatory architecture. Follow explicit user instructions when they constrain execution.
-- Phase 3 implementation is authorized. Stop before Phase 4.
+- Phase 4 integration, reliability, testing and final documentation are authorized.
 - Follow [architecture](docs/architecture.md) and the [four-phase plan](docs/implementation-plan.md). Implement incrementally, verify each phase, report results, and obtain the next phase instruction rather than implementing the entire application in one execution.
 - Update [progress](docs/progress.md) with completed work, pending work, decisions, commands/checks and their actual results, and known issues. Distinguish mocked verification from live integration verification. Never claim untested functionality works.
 - Preserve existing work. Create modules only when they have a concrete responsibility; do not precreate empty folders or placeholder files from the target tree.
