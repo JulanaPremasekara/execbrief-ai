@@ -1,5 +1,7 @@
 import {it,expect,vi,afterEach} from 'vitest';
-import {renderHook,act,cleanup,waitFor} from '@testing-library/react';
+import React from 'react';
+import {renderHook,render,screen,act,cleanup,waitFor} from '@testing-library/react';
+import ChatMessage from './components/ChatMessage';
 import {ReadableStream} from 'node:stream/web';
 import {useExecutiveStream} from './hooks/useExecutiveStream';
 
@@ -29,6 +31,11 @@ it('renders each completed SSE block progressively and preserves previous messag
   await waitFor(()=>expect(result.current.messages[1].blocks).toHaveLength(i+1));
   expect(result.current.messages[1].blocks[0].content).toBe('Summary');
   expect(result.current.loading).toBe(true);
+  expect(result.current.messages[1].done).toBe(false);
+  const view=render(<ChatMessage message={result.current.messages[1]}/>);
+  expect(screen.getByText('Summary')).toBeTruthy();
+  expect(view.container.querySelectorAll('figure')).toHaveLength(i>=3?2:i>=1?1:0);
+  view.unmount();
  }
  emit('done',{outcome:'completed',sources:[],stream_mode:'validated_blocks'});
  wire.close();

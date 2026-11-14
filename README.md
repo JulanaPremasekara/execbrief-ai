@@ -1,5 +1,18 @@
 # ExecBrief AI
 
+## Optional Google Gemini provider
+
+Google Gemini is available alongside Hugging Face through the same provider interface. Create a Gemini API key in [Google AI Studio](https://aistudio.google.com/apikey) and configure it locally in `.env.local` (never send the key in chat):
+
+```env
+EXECBRIEF_MODE=live
+LLM_PROVIDER=google
+GOOGLE_API_KEY=your_key_here
+GOOGLE_MODEL=your_available_gemini_model_id
+```
+
+Choose a model available to your Google project. Run `.\.venv\Scripts\python scripts/check_llm.py`, then restart the backend. Keep your HF settings to switch back with `LLM_PROVIDER=huggingface`. Selection is explicit; there is no automatic paid-provider fallback. Google responses use the same Pydantic, grounding, chart validation and validated-block streaming checks. API quota and model access still apply. Integration uses Google's documented [chat compatibility endpoint](https://ai.google.dev/gemini-api/docs/openai).
+
 ExecBrief AI turns an executive question into an evidence-backed briefing with text, charts, and recommendations.
 
 The demo uses fictional data for **Nexora Solutions (Pvt) Ltd**. The application is a single monorepo:

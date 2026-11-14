@@ -37,5 +37,6 @@ class HuggingFaceProvider:
                 if attempt==0 and status in (429,502,503,504):
                     await asyncio.sleep(1)
                     continue
-                raise ProviderError("Hosted inference failed or returned invalid structured output") from None
+                category = {400:"Hugging Face rejected the request; check model/task support",401:"invalid Hugging Face token",403:"Hugging Face access denied or credits unavailable",404:"Hugging Face model not found or unavailable",429:"Hugging Face quota exceeded"}.get(status, f"Hugging Face provider request failed (HTTP {status})" if status else "Hugging Face network or provider error")
+                raise ProviderError(category) from None
 

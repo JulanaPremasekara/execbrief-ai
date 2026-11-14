@@ -1,5 +1,17 @@
 # Project progress
 
+## Phase 1 SSE timing diagnosis
+
+- Real Uvicorn endpoint tested with curl.exe -N using scripts/check_mock_stream.py. Without pacing, all text/chart/done events arrived at 0.027 seconds. With optional 400ms mock pacing, first text arrived at 0.410s, line chart at 1.623s, bar chart at 3.655s, and done at 5.677s. The route yields each event directly; no complete-response collection was found. The parser reads response.body incrementally and preserves partial frames.
+- Root cause: the mock generator has all data ready and emits events without waiting, allowing network coalescing and React batching before a paint. Separate SSE frames do not guarantee separate browser paints. Also corrected the hook's queued updater to capture an immutable per-event snapshot instead of closing over the changing state variable.
+- Added MOCK_STREAM_DIAGNOSTIC=1 (mock mode only) to enable explicitly labeled 400ms diagnostic pacing; default remains unpaced. This is a temporary observation aid, not LLM token streaming. Existing live providers were not integrated or changed in this task.
+- Verification: 10 backend contract tests passed; 10 frontend tests passed. Expanded fragmented-stream integration test renders ChatMessage after each block and asserts summary text and zero/one/two chart figures while loading=true and done=false. This is DOM evidence before completion, not a manual browser/network walkthrough. curl timing directly verifies backend arrival before completion. Initial sandbox frontend launch failed with EPERM; authorized rerun passed.
+- Reproduce in PowerShell: set $env:EXECBRIEF_MODE='mock' and $env:MOCK_STREAM_DIAGNOSTIC='1', then start uvicorn execbrief.main:app --reload. Start the frontend normally. Remove the diagnostic variable and restart the backend to disable pacing.
+
+## Additional Google provider
+
+Added explicitly selected Google Gemini hosted adapter, GOOGLE_API_KEY/GOOGLE_MODEL configuration and selected-provider diagnostic. Hugging Face remains the default. Same domain interface, structured validation, grounding and backend chart datasets apply. No automatic fallback or live Google success is claimed; a local API key and available model are required. Google adapter tests: 3 passed with mocked HTTP, covering valid/invalid structured output and provider selection.
+
 Last updated: 2026-11-14 (Asia/Colombo).
 
 ## Current status

@@ -10,6 +10,8 @@
 
 ## Mandatory stack
 
+- User-authorized extension: Google Gemini may be selected with LLM_PROVIDER=google alongside the default Hugging Face provider. GOOGLE_API_KEY and GOOGLE_MODEL remain backend-only; preserve grounding and validation.
+
 - Frontend: React, Vite, JavaScript/JSX, Tailwind CSS, Recharts, React Hooks, Fetch API and ReadableStream with SSE parsing.
 - Backend: Python 3.11+, FastAPI, Pydantic v2, SQLAlchemy 2.x, psycopg 3, Pandas, Alembic, Pytest.
 - RAG: LangChain; `PyPDFLoader` and `CSVLoader` from `langchain_community.document_loaders`; `RecursiveCharacterTextSplitter` from `langchain_text_splitters`; `HuggingFaceEmbeddings` from `langchain_huggingface`; supported `langchain_postgres` integration and `.as_retriever()`.
