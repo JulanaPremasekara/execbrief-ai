@@ -1,28 +1,88 @@
 # ExecBrief AI
 
-Executive briefings for fictional Nexora Solutions: React/Recharts, FastAPI, LangChain retrieval, Supabase PostgreSQL/pgvector analytics and hosted Hugging Face inference. Domain contracts, application orchestration and infrastructure adapters remain separate.
+ExecBrief AI turns an executive question into an evidence-backed briefing with text, charts, and recommendations.
 
-Phase 4 connects the live pipeline to the existing SSE interface. Automated tests mock external services. Live acceptance remains blocked by local Supabase/HF configuration; see [progress](docs/progress.md).
+The demo uses fictional data for **Nexora Solutions (Pvt) Ltd**. The application is a single monorepo:
 
-## Local setup (PowerShell)
+- `apps/frontend` — React, Vite, Tailwind CSS, Recharts, and the browser SSE client.
+- `apps/backend` — FastAPI, application services, domain contracts, analytics, LangChain ingestion/retrieval, and the SSE API.
+- Supabase PostgreSQL with `pgvector` — structured KPI data and semantic document search.
+- Hosted Hugging Face inference — query planning and response generation. The language model is never hosted locally.
 
-Use Python 3.11+ (tested with 3.13) and Node 22.13+. From the repository root:
+The code follows Clean Architecture. API routes handle HTTP and SSE serialization, application services coordinate use cases, domain contracts define business-facing interfaces, and infrastructure modules connect external systems.
+
+## Current status
+
+The Phase 4 integration is implemented and automated tests pass. The default mode is `mock`, so a new developer can run the interface without external accounts. `live` mode connects Supabase, LangChain retrieval, verified analytics, and Hugging Face inference.
+
+Live acceptance still depends on valid local Supabase and Hugging Face configuration. See [docs/progress.md](docs/progress.md) for the latest verification record.
+
+## Prerequisites
+
+- Python 3.11 or newer (tested with Python 3.13).
+- Node.js 22.13 or newer and npm.
+- A Supabase project for live mode.
+- A Hugging Face token and a chat-capable hosted model for live mode.
+
+The commands below use PowerShell on Windows. On macOS or Linux, replace `.venv\Scripts\python` with `.venv/bin/python` and `npm.cmd` with `npm`.
+
+## Quick start: offline demo
+
+The offline demo needs no database or model credentials.
+
+From the repository root:
 
 ```powershell
 python -m venv .venv
 .\.venv\Scripts\python -m pip install -r apps/backend/requirements.lock -e "./apps/backend[test]"
+```
+
+Start the API in one terminal:
+
+```powershell
+.\.venv\Scripts\python -m uvicorn execbrief.main:app --reload
+```
+
+Start the frontend in a second terminal:
+
+```powershell
+cd apps/frontend
+npm.cmd ci
+npm.cmd run dev
+```
+
+Open [http://localhost:5173](http://localhost:5173), then ask:
+
+> How is our company performing over the last six months?
+
+Mock mode returns a fixed, clearly labeled demonstration. It shows the intended sequence: text, line chart, text, bar chart, and recommendations. Include `text only` in a question to exercise the text-only response.
+
+## Configure live mode
+
+Create a local environment file. It is ignored by Git and must never be committed:
+
+```powershell
 Copy-Item .env.example .env.local
 ```
 
-Copy the example only if `.env.local` does not already exist. Configure secrets locally; never paste them in chat or expose them in `VITE_` variables. Existing process environment variables take precedence over `.env.local`.
+Set these values in `.env.local`:
 
-- `DATABASE_URL`: in your existing Supabase dashboard, open **Connect**, select the **Session pooler** PostgreSQL URI on port **5432**, substitute your database password and URL-encode special characters. Do not use transaction pooling on port 6543. SSL is enforced.
-- `HF_TOKEN`: Hugging Face token with inference-provider access.
-- `HF_MODEL`: hosted chat/instruction model ID available to your account/provider. Availability is not assumed. `HF_PROVIDER=auto` is the default.
-- `FRONTEND_ORIGIN=http://localhost:5173`.
-- `EXECBRIEF_MODE=live` enables retrieval/analytics/inference. Default `mock` returns a fixed, visibly labeled demonstration without external services.
+| Variable | Purpose |
+| --- | --- |
+| `EXECBRIEF_MODE=live` | Selects the real retrieval, analytics, and inference pipeline. |
+| `DATABASE_URL` | Supabase PostgreSQL Session Pooler URI on port `5432`. |
+| `HF_TOKEN` | Hugging Face token with inference-provider access. |
+| `HF_MODEL` | Hosted chat/instruction model ID available to your account. |
+| `HF_PROVIDER=auto` | Hugging Face provider selection; `auto` is the default. |
+| `FRONTEND_ORIGIN=http://localhost:5173` | Allowed browser origin for the API. |
 
-For live mode, generate fictional data, verify access, migrate/import and ingest:
+To get `DATABASE_URL`, open your Supabase project, select **Connect**, choose the **Session pooler** PostgreSQL connection string, and use port `5432`. Replace its password with your database password and URL-encode special characters. Do not use the transaction pooler on port `6543`; the application requires session affinity. SSL is enforced by the backend.
+
+Do not put any secret in a `VITE_` variable. Vite variables are available to browser code. Existing process environment variables take precedence over `.env.local`.
+
+## Prepare live data
+
+The repository generates one deterministic fictional dataset shared by six CSV files and six PDF reports. Run these commands from the repository root:
 
 ```powershell
 .\.venv\Scripts\python scripts/generate_synthetic_data.py
@@ -32,33 +92,27 @@ For live mode, generate fictional data, verify access, migrate/import and ingest
 .\.venv\Scripts\python scripts/check_hf.py
 ```
 
-Seeding runs Alembic. Setup discovers pgvector's actual schema and enables it if missing, requiring database permission. Relational/vector tables use `execbrief`. Ingestion downloads MiniLM for local CPU embeddings; language generation remains hosted. Live setup has not succeeded against the currently configured services. See [RAG setup](docs/rag-pipeline.md) for provenance and repeat-ingestion behavior.
+These steps generate May–October 2026 data, verify Supabase and `pgvector`, apply migrations, import KPI records, ingest documents with LangChain, create local CPU embeddings, and check Hugging Face access. The database uses the `execbrief` schema and discovers the actual `pgvector` schema.
 
-Start the backend:
+## Run the live application
+
+Restart the backend after changing `.env.local`:
 
 ```powershell
 .\.venv\Scripts\python -m uvicorn execbrief.main:app --reload
 ```
 
-In another terminal:
+Keep the frontend running with `npm.cmd run dev` and submit the six-month question again. Live chart rows come from backend analytics. The model can choose a chart specification, but it cannot provide chart data, execute SQL, or execute generated code.
 
-```powershell
-cd apps/frontend
-npm.cmd ci
-npm.cmd run dev
-```
+## Streaming behavior
 
-Open http://localhost:5173. Vite proxies `/api` to port 8000. Ask **"How is our company performing over the last six months?"**. Live charts use backend analytics; mock charts are fixtures. History persists in browser memory until reload. **Stop response** aborts the request while retaining displayed content.
+`POST /api/chat/stream` emits the documented event types in order: `status`, `block_start`, `text_delta`, `block_end`, `chart`, `error`, and `done`. See [docs/api-contracts.md](docs/api-contracts.md).
 
-## Streaming and limitations
+Live mode currently uses a **validated-block fallback**. The complete structured model response is validated before blocks are displayed, so text is emitted per validated block rather than token by token. This is labeled in the UI. No artificial delays are added. True hosted token streaming has not been claimed because provider capability is not verified.
 
-The seven-event [SSE contract](docs/api-contracts.md) preserves text/chart order and stable IDs. Live mode uses **validated-block fallback**, visibly labeled: complete structured output is validated before blocks are emitted. Text arrives once per validated block; this is not token streaming. There are no artificial display delays. React may batch blocks received together into one paint.
+The frontend keeps completed blocks and sources when a later block fails or the user cancels. A synchronous database or embedding operation already running in a worker cannot be forcibly interrupted; its resources are disposed when the worker finishes.
 
-Hosted token-stream capability remains unverified because the configured provider check fails. Raw unvalidated model tokens are never displayed. Genuine token streaming requires a successful capability check and a grounding-safe incremental response contract. Factual prose is extractive; recommendations are suggestions, not mechanically proven conclusions. See [AI workflow](docs/ai-workflow.md).
-
-Cancellation closes asynchronous inference and request resources. Blocking database/embedding work already running in a worker cannot be forcibly stopped; initialization resources are disposed when the worker completes. Production authentication, access controls, rate limits, deployment packaging and an SSE proxy have not been implemented or deployment-tested. Vite's development proxy is not a production server.
-
-## Verification
+## Test and build
 
 ```powershell
 .\.venv\Scripts\python -m pytest apps/backend/tests -q
@@ -67,13 +121,32 @@ npm.cmd test
 npm.cmd run build
 ```
 
-Automated inference is mocked and consumes no paid inference quota. Opt into live checks from the repository root:
+Tests mock paid/external services and do not require inference quota. Current results are recorded in [docs/progress.md](docs/progress.md); skipped live tests are not successful live checks.
+
+To opt into live database tests and the exact executive-question workflow check:
 
 ```powershell
+cd D:\execbrief-ai
 $env:RUN_SUPABASE_TESTS="1"
 .\.venv\Scripts\python -m pytest apps/backend/tests/integration -q --tb=no
 Remove-Item Env:RUN_SUPABASE_TESTS
 .\.venv\Scripts\python scripts/check_workflow.py
 ```
 
-The workflow check submits the exact executive question through FastAPI in-process with real configured services. It may consume inference quota; it is not a browser walkthrough. Actual results and remaining acceptance checks are in [progress](docs/progress.md).
+The workflow check uses local credentials and may consume Hugging Face quota. It prints only sanitized status messages.
+
+## Troubleshooting
+
+**The UI cannot connect:** confirm the backend runs on port `8000`, the frontend on port `5173`, and the Vite proxy is active.
+
+**The database hostname cannot be resolved:** copy a current Session Pooler URI from Supabase Dashboard → Connect, check port `5432`, network access, and the rotated password. Never paste the URI into chat or commit it.
+
+**The Hugging Face check fails:** confirm `HF_TOKEN` has inference access and `HF_MODEL` is a hosted chat/instruction model supported by the provider.
+
+**The response says validated blocks:** this is expected until a compatible hosted model and safe incremental response contract are verified. It is not token-level streaming.
+
+## Production boundary
+
+This repository contains the application integration and a backend Dockerfile, but it is not a complete production deployment. Before exposing it to users, add authentication, authorization, rate limiting, secret management, observability, backups, HTTPS, an SSE-compatible reverse proxy, and deployment-specific readiness checks. The Vite server is a development server and should not be used as the production frontend server.
+
+For implementation details, read [AGENTS.md](AGENTS.md), [docs/architecture.md](docs/architecture.md), [docs/implementation-plan.md](docs/implementation-plan.md), [docs/ai-workflow.md](docs/ai-workflow.md), and [docs/rag-pipeline.md](docs/rag-pipeline.md).
