@@ -1,6 +1,6 @@
 # Proposed architecture
 
-Status: design only; no application implementation exists. This document follows all sections of [MASTER_SPEC.md](MASTER_SPEC.md). The current workspace contains the master specification and the requested planning documents; it is not yet initialized as a Git repository.
+Status: Phase 1 mock slice and Phase 2 data/ingestion adapters implemented. Phase 2 live database verification is pending connection configuration. Later AI/analytics components remain design targets. See rag-pipeline.md and progress.md for implemented behavior and evidence.
 
 ## Layers and dependency direction
 

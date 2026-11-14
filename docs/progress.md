@@ -1,10 +1,59 @@
 # Project progress
 
-Last updated: 2026-11-13 (Asia/Colombo).
+Last updated: 2026-11-14 (Asia/Colombo).
 
 ## Current status
 
-Planning documentation prepared. Application implementation has not started. Waiting for the user's instruction to begin Phase 1; no application functionality is complete or tested.
+Phase 3 backend implementation is present and mocked verification passes. Live acceptance is blocked by database DNS resolution and a failed hosted-model capability check. Phase 3 is not fully verified. Phase 4 has not started.
+
+## Phase 3 delivery and verification
+
+- Added replaceable LLM, analytics and metrics repository contracts; hosted Hugging Face async provider with bounded timeouts, sanitized failures, one transient retry and Pydantic structured-output validation.
+- Added executive query planning with allowlisted operations and May–October period validation; retrieval supplies domain evidence through the existing retriever.
+- Added Pandas calculations over SQLAlchemy repository records for revenue/growth/targets, expenses/budgets, sales, turnover, project delays and operational trends.
+- Added grounded response validation and backend dataset resolution. Factual text must exactly match supplied evidence/analytical facts. Recommendations are explicitly labeled; their qualitative quality still requires live evaluation.
+- Integrated the opt-in live path through dependency composition while preserving default mock behavior. The live path uses validated_blocks fallback, not incremental model tokens. Added docs/ai-workflow.md.
+- Backend suite: 34 passed, 2 live tests skipped. Includes ten representative question workflow tests with mocked planning, numerical expected values, zero denominator/empty data, invented-number rejection, invalid operations, missing evidence, provider failures, malformed output and rate-limit retry.
+- Live database diagnostic failed: configured hostname does not resolve. Phase 2 live schema/ingestion verification is still pending.
+- Hosted HF capability check failed with sanitized output. Model availability, token permissions or provider access must be corrected locally before live planning/generation can be verified.
+- Remaining acceptance: live retrieval, hosted question interpretation/grounding, all ten real-provider demo outcomes and browser integration. No live success is claimed.
+- Phase 4 remains unauthorized.
+
+## Phase 2 delivery and verification
+
+- Added deterministic fictional May–October 2026 data generation: six CSVs (126 records total) and six PDFs derived from shared facts. Sales totals reconcile to monthly revenue; October revenue is LKR 14,000,000. Reports preserve the fictional explanation for deferred Atlas billing.
+- Added server-side .env.local loading, SQLAlchemy/psycopg SSL connections, bounded pooling, extension schema discovery, dedicated execbrief schema, Alembic relational migration and idempotent structured imports.
+- Added domain document/ingestion/retriever ports, modular PyPDFLoader and CSVLoader adapters, 1000/200 recursive splitting, CPU HuggingFaceEmbeddings, LangChain PostgreSQL storage and configurable similarity retrieval.
+- Added source-scoped content-addressed chunk replacement, with stale-chunk cleanup after successful insertion. Concurrent writers use a session advisory lock. Interrupted replacement may temporarily expose old and new chunks; rerunning converges. Removed files require explicit cleanup and are not automatically deleted.
+- Added CLI generation, safe database diagnostics, seeding and ingestion, and docs/rag-pipeline.md setup instructions. Chat remains the Phase 1 mock flow.
+- Dependency installation completed; requirements.lock refreshed from the installed environment.
+- Generation command passed and created all 12 artifacts.
+- Backend suite: 15 passed, 2 live tests skipped by default. Tests cover Phase 1 regression plus deterministic PDF/CSV generation, reconciliation, metadata, splitting, invalid imports, repeat orchestration and mocked retriever contract.
+- Real CPU embedding smoke check passed: all-MiniLM-L6-v2 downloaded and returned 384-dimensional embeddings. Windows cache emitted a non-fatal symlink warning.
+- Live seed and ingestion commands failed with OperationalError. A separate DNS check established that the configured hostname could not be resolved, including outside the sandbox.
+- Explicit live integration test run: 2 failed due to connection unavailability. No successful database mutation or retrieval is claimed.
+- Installed langchain-community emits a deprecation warning; the specification explicitly requires its PyPDFLoader and CSVLoader, so those adapters remain isolated for future migration.
+- Security correction: the interrupted initial inspection printed .env.local contents. User was informed and asked to rotate the database password and HF token locally. Subsequent commands do not print credentials; .env.local is ignored and was not tracked.
+- User action needed: configure the existing Supabase dashboard Session pooler URI (port 5432) as DATABASE_URL in .env.local, with a rotated password. Then rerun safe connection check, migration/seed, ingestion and live tests.
+- Remaining Phase 2 acceptance: successful live schema/extension/import/retrieval and duplicate-ingestion verification. Phase 3 is not authorized.
+
+## Phase 1 delivery and verification
+
+- Created React/Vite JavaScript frontend with Tailwind, modular chat components, source references, Recharts bar/line strategies and registry.
+- Created FastAPI backend with separate domain provider contract/block entity, mock infrastructure adapter, application use case, dependency composition, Pydantic request/chart schemas, health endpoint and POST SSE endpoint.
+- Implemented the fictional sequence Text → Line Chart → Text → Bar Chart → Recommendations. Every question receives the fixed fixture; "text only" omits charts. Fixtures are isolated in infrastructure and explicitly labeled mock.
+- Implemented fetch/ReadableStream parsing, fragmented UTF-8 and CRLF handling, stable message/block state, history, errors, completion and cancellation. No artificial streaming delays or live inference claims.
+- Added README setup instructions, API contract, blank-secret environment example, ignores, frontend lockfile and backend dependency snapshot. Existing Git repository was preserved.
+- Backend: ` .venv/Scripts/python -m pytest apps/backend/tests ` — 10 passed. Covers endpoint event order, metadata, chart validation, invalid requests, text-only response, health and sanitized failure events.
+- Frontend: `npm.cmd test` — 8 passed with Vitest 4.1.12. Covers byte-fragmented streams, incomplete frames, ordered text and chart DOM rendering using real Recharts, append behavior, errors, cancellation, early EOF and conversation preservation.
+- Frontend: `npm.cmd run build` — passed. Build reports a 647 kB main bundle (192.51 kB gzip); bundle splitting remains a possible improvement.
+- Dependency installation initially encountered sandbox restrictions. Tests/build ran successfully after permission to spawn compiler/test processes. Chart JSX syntax was corrected after the first failed build.
+- Initial test-runner dependency audit reported vulnerabilities. Upgraded Vitest to 4.1.12; npm 11.1 encountered an internal edgesOut error, resolved by running `npx.cmd --yes npm@11.12.0 install`. Final install audit reported zero vulnerabilities.
+- Backend test warnings: upstream Starlette HTTPX TestClient deprecation and sandbox denial of pytest cache creation; neither failed a test.
+- Live browser walkthrough, browser-to-running-server flow and disconnect cleanup under a real network connection have not been verified. No Supabase, RAG, analytics or hosted inference work was performed.
+- Next action: stop after Phase 1. Await the user's next instruction; do not begin Phase 2.
+
+The remaining sections below preserve the original planning baseline; their pre-implementation statuses are historical and are superseded by the Phase 1 delivery record above.
 
 ## Completed tasks
 
@@ -19,8 +68,8 @@ Planning documentation prepared. Application implementation has not started. Wai
 
 | Phase | Status | Main remaining work |
 | --- | --- | --- |
-| 1 - End-to-end UI and streaming | Not started; awaiting instruction | Monorepo, React/FastAPI, domain/API contracts, mock SSE, charts, sources, parser and tests |
-| 2 - Supabase and data | Not started | Fictional generation, hosted database/migrations, structured import, loaders/splitting/embeddings, vector retrieval and deduplication |
+| 1 - End-to-end UI and streaming | Implemented; automated checks pass | Manual browser walkthrough remains unverified |
+| 2 - Supabase and data | Implemented; live verification blocked | Configure resolvable Supabase URI; verify extension, migrations, imports, ingestion, retrieval and duplicate counts |
 | 3 - AI integration | Not started | Hosted HF provider, query planning, verified analytics, grounded responses, real streaming/fallback and ten demo questions |
 | 4 - Architecture and testing | Not started | Architecture audit, expanded tests/reliability, setup documentation and complete acceptance verification |
 
@@ -66,4 +115,4 @@ Detailed gates and criteria are in [implementation-plan.md](implementation-plan.
 
 ## Next authorized action
 
-Stop after presenting the plan. Wait for the user to instruct: begin Phase 1.
+Correct local database/model configuration and resume Phase 3 live verification. Stop before Phase 4.

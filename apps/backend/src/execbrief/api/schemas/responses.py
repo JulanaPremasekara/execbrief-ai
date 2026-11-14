@@ -26,6 +26,8 @@ class ChartPayload(BaseModel):
     def approved_dataset(self):
         allowed = {"monthly_revenue": {"month","actual","target"},
                    "department_expenses": {"department","actual","budget"}}
+        from execbrief.domain.analytics import OPERATIONS
+        allowed.update({name:{x,*ys} for name,(_,x,ys) in OPERATIONS.items()})
         spec = self.spec
         columns = allowed.get(spec.dataset_id, set())
         if (spec.id != self.block_id or self.dataset.get("id") != spec.dataset_id
@@ -33,7 +35,7 @@ class ChartPayload(BaseModel):
             or set(self.dataset.get("columns", [])) != columns):
             raise ValueError("Unapproved chart dataset or columns")
         for row in self.dataset.get("rows", []):
-            if not columns <= row.keys() or any(type(row[y]) not in (int, float) for y in spec.y):
+            if not columns <= row.keys() or any(row[y] is not None and type(row[y]) not in (int, float) for y in spec.y):
                 raise ValueError("Invalid chart rows")
         return self
 

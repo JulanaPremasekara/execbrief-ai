@@ -1,6 +1,6 @@
 # Four-phase implementation plan
 
-Status: proposed; all application phases are pending. Follow [MASTER_SPEC.md](MASTER_SPEC.md), [architecture.md](architecture.md) and [AGENTS.md](../AGENTS.md). The user has authorized documentation only. Stop after these documents and wait for an explicit instruction to begin Phase 1.
+Status: Phase 1 implemented; Phase 2 authorized and in progress. Follow [MASTER_SPEC.md](MASTER_SPEC.md), [architecture.md](architecture.md) and [AGENTS.md](../AGENTS.md). Stop before Phase 3. See progress.md for actual verification evidence.
 
 ## Execution and evidence rules
 
