@@ -6,18 +6,20 @@ from execbrief.core.runtime import execution_mode
 def build_llm():
     from execbrief.core import data_config
     provider = os.getenv("LLM_PROVIDER", "huggingface").strip().lower()
+    if provider in ("local", "ollama"):
+        from execbrief.infrastructure.llm.local_provider import LocalProvider
+        return LocalProvider(os.getenv("OLLAMA_MODEL", ""), os.getenv("OLLAMA_BASE_URL", "http://127.0.0.1:11434"), float(os.getenv("OLLAMA_TIMEOUT", "120")))
     if provider == "google":
         from execbrief.infrastructure.llm.google_provider import GoogleProvider
         return GoogleProvider(os.getenv("GOOGLE_MODEL"), os.getenv("GOOGLE_API_KEY"))
     if provider == "huggingface":
         from execbrief.infrastructure.llm.huggingface_provider import HuggingFaceProvider
         return HuggingFaceProvider(os.getenv("HF_MODEL"), os.getenv("HF_TOKEN"), os.getenv("HF_PROVIDER", "auto"))
-    raise ValueError("LLM_PROVIDER must be huggingface or google")
+    raise ValueError("LLM_PROVIDER must be huggingface, google, local or ollama")
 
 
 def build_live():
     from execbrief.application.use_cases.ask_grounded import AskGroundedUseCase
-    from execbrief.infrastructure.llm.huggingface_provider import HuggingFaceProvider
     from execbrief.infrastructure.analytics.pandas_engine import PandasAnalytics
     from execbrief.infrastructure.database.repositories.metrics_repository import MetricsRepository
     llm=build_llm()

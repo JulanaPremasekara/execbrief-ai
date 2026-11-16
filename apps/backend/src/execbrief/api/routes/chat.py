@@ -25,7 +25,7 @@ async def chat(body: ChatRequest, use_case=Depends(get_chat)):
                     payload = ChartPayload.model_validate(payload).model_dump()
                 yield encode(event, payload)
         except Exception:
-            logging.getLogger(__name__).warning("Executive response failed; exception details suppressed")
+            logging.getLogger(__name__).exception("Executive response failed")
             yield encode("error", dict(code="response_failed", message="Unable to complete response.", retryable=True))
             yield encode("done", dict(outcome="error", sources=[], stream_mode=getattr(use_case,"stream_mode","mock")))
         finally:

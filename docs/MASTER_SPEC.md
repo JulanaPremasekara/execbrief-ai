@@ -65,6 +65,8 @@ Implement a functional MVP first, but maintain proper architectural boundaries f
 - Relational tables for structured KPIs
 - Vector storage for document embeddings
 
+User-authorized extension: optional local Ollama generation is permitted through `LLM_PROVIDER=local` or `ollama`; see [Ollama setup](ollama.md). This supersedes local-generation prohibitions below. Existing grounding and validation requirements apply.
+
 Do not use:
 - Streamlit
 - ChromaDB

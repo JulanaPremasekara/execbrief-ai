@@ -155,3 +155,31 @@ Detailed gates and criteria are in [implementation-plan.md](implementation-plan.
 ## Next authorized action
 
 Correct local database/model configuration and rerun the pending live acceptance checks documented above. Phase 4 code work is delivered; final acceptance is pending, not claimed complete.
+# Optional Ollama provider
+
+- Docker host adapter verification: local provider suite 11 passed with mocked HTTP; Compose validation passed again.
+
+- Added frontend multi-stage Dockerfile/Nginx SSE proxy, non-root backend Dockerfile, root Compose configuration, secret-excluding .dockerignore, persistent embedding cache and data mount. Supabase remains external; Ollama runs on the host via host.docker.internal. Setup is in docs/docker.md.
+- `docker compose config --quiet` accepted configuration. `docker version` found the CLI but no running Docker Desktop Linux engine; container builds and runtime verification remain pending.
+
+- Frontend verification follow-up: sandbox build hit spawn EPERM; approved `npm.cmd run build` passed outside sandbox, with a bundle-size warning (648 kB JS).
+
+- Added deterministic revenue-focused executive briefing: overview, verified bar chart (line when explicitly requested), calculated insights, and clearly labeled suggested actions. Missing/zero values are handled without invented growth. Causes are explicitly unestablished; this template does not yet synthesize report-supported causal explanations. Broad multi-topic requests retain the existing model path.
+- Frontend renders the three briefing headings distinctly. Four focused backend tests passed for calculations, order, chart rows, missing values and citations. Initial frontend build command blocked by PowerShell execution policy; retried using npm.cmd. Browser/live acceptance pending.
+
+- Added deterministic readable analytics evidence (formatted months, LKR values, explicit unavailable growth), per-block cited sources and deduplicated used-source aggregation. Added verified revenue line-chart fallback for trend/overview requests when generation omits it. Other charts still depend on model selection. No live UI verification claimed.
+- Broader unit run: 31 passed, 2 failures from existing HF error-message expectations, 4 errors from Windows temporary-directory permissions. Focused readable-response/local-provider run: 12 passed.
+
+- Follow-up structured-response failure: simplified local generation to evidence-ID selection with empty content; backend expands selected verified text and revalidates before application grounding. Removed large passage enums. Added safe specific errors for incomplete output, unknown IDs, missing selections and unmatched prose. Exact cause of the user's generic exception could not be recovered from the suppressed traceback.
+- Focused verification: `python -m pytest apps/backend/tests/unit/test_local_provider.py -q -p no:cacheprovider`: 10 passed using project venv, including selected evidence expansion through ResponsePlanner. Live Ollama/full chat remains unverified.
+
+- Local factual generation now constrains content to supplied evidence passages and resolves attribution by exact passage equality. Unknown IDs and unmatched prose remain rejected. Local recommendations are omitted under this extractive fallback; this is a functionality limitation. Live verification pending.
+
+- Fixed local response citation generation after live `Unknown source` failure: request-specific JSON schema constrains citation strings to supplied evidence keys; adapter independently rejects unknown IDs. Application grounding remains intact. Manual checker now uses the real evidence-object shape.
+- Verification: `.\.venv\Scripts\python -m pytest apps/backend/tests/unit/test_local_provider.py -q -p no:cacheprovider`: 8 passed, mocked HTTP. Live retry remains unverified.
+
+- User explicitly authorized local Ollama generation. Added LocalProvider, local/ollama selection, backend configuration template and manual scripts/check_ollama.py. Existing empty untracked local_provider.py was populated; unrelated request-schema edits were preserved.
+- HTTP schema-constrained generation preserves existing application grounding and validated-block SSE. Loopback-only endpoint, finite timeout, sanitized failures and cancellation propagation are implemented.
+- Setup: docs/ollama.md. Live Ollama/model and end-to-end Supabase checks have not been run.
+- `.\.venv\Scripts\python -m pytest apps/backend/tests/unit/test_local_provider.py -q -p no:cacheprovider`: 6 passed (mocked HTTP validation, network/timeout errors, cancellation and selection).
+

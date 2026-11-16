@@ -1,5 +1,7 @@
 # Proposed architecture
 
+Optional local generation is now user-authorized through the LocalProvider Ollama adapter; see [configuration and verification](ollama.md). It implements the same generate contract and retains validated-block SSE and application grounding.
+
 Status: all four phases have implementation present; live acceptance is pending Supabase/HF configuration. The target tree below is a design map, not a claim that every named module exists. See progress.md for verified results.
 
 ## Implemented live request lifecycle
